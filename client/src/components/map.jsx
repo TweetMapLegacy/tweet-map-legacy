@@ -6,29 +6,40 @@ export default class Map extends React.Component {
   constructor() {
 		super();
 		this.state = {
-			states: {
-				AZ: {}, CO: {}, DE: {}, FL: {}, GA: {}, HI: {}, ID: {}, IL: {}, IN: {}, IA: {}, 
-				KS: {}, KY: {}, LA: {}, MD: {}, ME: {}, MA: {}, MN: {}, MI: {}, MS: {}, MO: {},
-				MT: {}, NC: {}, NE: {}, NV: {}, NH: {}, NJ: {}, NY: {}, ND: {}, NM: {}, OH: {},
-				OK: {}, OR: {}, PA: {}, RI: {}, SC: {}, SD: {}, TN: {}, TX: {}, UT: {}, WI: {},
-				VA: {}, VT: {}, WA: {}, WV: {}, WY: {}, CA: {}, CT: {}, AK: {}, AR: {}, AL: {}
-			},
+			states: [],
 			nationalTrends: [],
 			selectValue: 'Top National Trends',
       colors: {},
 			textbox: '',
-			searched: ''
+			searched: '',
+			scope: "usa",
 		}
     this.handleDropdown = this.handleDropdown.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
     this.handleTextboxChange = this.handleTextboxChange.bind(this);
-  }
+	}
+	
   componentWillMount() {
-    this.getNationalTrends();
-  }
+		this.getNationalTrends();
+		this.useAmericanStates();
+	}
 
-  getNationalTrends() {
-		axios.get('/nationaltrends')
+	
+	changeScope(scope) {
+		this.setState({
+			scope: scope
+		});
+		if (scope === "world") {
+			this.setState({
+				states: [],
+			})
+		} else {
+			this.useAmericanStates();
+		}
+	}
+		
+getNationalTrends() {
+			axios.get('/nationaltrends')
 			.then((response) => {
 				this.setState({
 					nationalTrends: response.data
@@ -36,111 +47,134 @@ export default class Map extends React.Component {
 			}).catch((err) => {
 				return console.error(err);
 			})
-	}
-	
-	postStatePercentages(searchTerm) {
-		console.log('Keyword:', searchTerm)
-		if (searchTerm !== '') {
-			axios.post('/statepercentages', {word: searchTerm})
+		}
+		
+		postStatePercentages(searchTerm) {
+			console.log('Keyword:', searchTerm)
+			if (searchTerm !== '') {
+				axios.post('/statepercentages', {word: searchTerm})
 				.then((response) => {
 					this.setPercentages(response.data);
 				})
-		}
-	}
-
-  setPercentages(data) {
-		let statesCopy = Object.assign({}, this.state.states);
-		//Clear percentages
-		for (let state in statesCopy) {
-			statesCopy[state].fillKey = 0;
-			statesCopy[state].text = [];
-		}
-
-		//Populate percentages
-		for (let state in statesCopy) {
-			if (data[state]) {
-				statesCopy[state].fillKey = data[state].fillKey;
-				statesCopy[state].text = data[state].text;
 			}
 		}
-		this.setState({
-			states: statesCopy,
-		});
-		this.setFills();
-		setTimeout(() => console.log(this.state.states), 1000);
-  }
-
-  setTrends(data) {
-		let statesCopy = Object.assign({}, this.state.states);
-		for (let state in statesCopy) {
-	  	statesCopy[state].trends = data[state].trends;
-		}
-		this.setState({states: statesCopy});
-  }
-	
-	setFills() {
-		//Find lowest and highest percentages to make color gradient
-		let lowest = 100, highest = 0, sumPercentage = 0, count = 0, mean, colors;
-		let colorObj = {};
-		for (let state in this.state.states) {
-			count++;
-			sumPercentage += this.state.states[state].fillKey;
-			this.state.states[state].fillKey < lowest ? lowest = this.state.states[state].fillKey : null;
-			this.state.states[state].fillKey > highest ? highest = this.state.states[state].fillKey : null;
+		
+		setPercentages(data) {
+			let statesCopy = Object.assign({}, this.state.states);
+			//Clear percentages
+			for (let state in statesCopy) {
+				statesCopy[state].fillKey = 0;
+				statesCopy[state].text = [];
+			}
+			
+			//Populate percentages
+			for (let state in statesCopy) {
+				if (data[state]) {
+					statesCopy[state].fillKey = data[state].fillKey;
+					statesCopy[state].text = data[state].text;
+				}
+			}
+			this.setState({
+				states: statesCopy,
+			});
+			this.setFills();
+			setTimeout(() => console.log(this.state.states), 1000);
 		}
 		
-		mean = sumPercentage / count;
-    //Create color gradient based on lowest and highest percentages found
-    if (lowest < highest) {
-      colors = d3.scale.linear().domain([lowest, mean, highest]).range(['#fff0f0', '#ff4d4d', '#990000']);
-    } else {
-      colors = d3.scale.linear().domain([lowest, highest]).range(['#ABDDA4', '#ABDDA4']);
-    }
-		for (let state in this.state.states) {
-			colorObj[this.state.states[state].fillKey] = colors(this.state.states[state].fillKey)	
+		setTrends(data) {
+			let statesCopy = Object.assign({}, this.state.states);
+			for (let state in statesCopy) {
+				statesCopy[state].trends = data[state].trends;
+			}
+			this.setState({states: statesCopy});
 		}
-		this.setState({
-			colors: colorObj
-		})
 		
-	}
-
-	handleDropdown(event) {
-		this.postStatePercentages(event.target.value);
-		this.setState({
-			textbox: '',
-			searched: event.target.value
-		})
-    event.preventDefault();
-  }
-
-  handleTextboxChange(event) {
-    this.setState({
-			textbox: event.target.value
-		});
-  }
-  
-  handleSubmit(event) {
-    this.postStatePercentages(this.state.textbox);
-    this.setState({
-			textbox: '',
-			searched: this.state.textbox
-		});
-    event.preventDefault();
-	}
-	
-	makeUnderline(input, wordsToUnderline) {
-		return input.replace(new RegExp('(\\b)(' + wordsToUnderline.join('|') + ')(\\b)','ig'), '$1<u>$2</u>$3');
-	}
-
-  render() {
-		return (
-			<div>
+		setFills() {
+			//Find lowest and highest percentages to make color gradient
+			let lowest = 100, highest = 0, sumPercentage = 0, count = 0, mean, colors;
+			let colorObj = {};
+			for (let state in this.state.states) {
+				count++;
+				sumPercentage += this.state.states[state].fillKey;
+				this.state.states[state].fillKey < lowest ? lowest = this.state.states[state].fillKey : null;
+				this.state.states[state].fillKey > highest ? highest = this.state.states[state].fillKey : null;
+			}
+			
+			mean = sumPercentage / count;
+			//Create color gradient based on lowest and highest percentages found
+			if (lowest < highest) {
+				colors = d3.scale.linear().domain([lowest, mean, highest]).range(['#fff0f0', '#ff4d4d', '#990000']);
+			} else {
+				colors = d3.scale.linear().domain([lowest, highest]).range(['#ABDDA4', '#ABDDA4']);
+			}
+			for (let state in this.state.states) {
+				colorObj[this.state.states[state].fillKey] = colors(this.state.states[state].fillKey)	
+			}
+			this.setState({
+				colors: colorObj
+			})
+			
+		}
+		
+		handleDropdown(event) {
+			this.postStatePercentages(event.target.value);
+			this.setState({
+				textbox: '',
+				searched: event.target.value
+			})
+			event.preventDefault();
+		}
+		
+		handleTextboxChange(event) {
+			this.setState({
+				textbox: event.target.value
+			});
+		}
+		
+		handleSubmit(event) {
+			this.postStatePercentages(this.state.textbox);
+			this.setState({
+				textbox: '',
+				searched: this.state.textbox
+			});
+			event.preventDefault();
+		}
+		
+		makeUnderline(input, wordsToUnderline) {
+			return input.replace(new RegExp('(\\b)(' + wordsToUnderline.join('|') + ')(\\b)','ig'), '$1<u>$2</u>$3');
+		}
+		
+		useAmericanStates() {
+			this.setState({
+				states: {
+						AZ: {}, CO: {}, DE: {}, FL: {}, GA: {}, HI: {}, ID: {}, IL: {}, IN: {}, IA: {}, 
+						KS: {}, KY: {}, LA: {}, MD: {}, ME: {}, MA: {}, MN: {}, MI: {}, MS: {}, MO: {},
+						MT: {}, NC: {}, NE: {}, NV: {}, NH: {}, NJ: {}, NY: {}, ND: {}, NM: {}, OH: {},
+						OK: {}, OR: {}, PA: {}, RI: {}, SC: {}, SD: {}, TN: {}, TX: {}, UT: {}, WI: {},
+						VA: {}, VT: {}, WA: {}, WV: {}, WY: {}, CA: {}, CT: {}, AK: {}, AR: {}, AL: {} 
+				}
+			});
+		}
+		render() {
+			return (
+				<div>
 				<div>
           <form onSubmit={this.handleSubmit}>
               <input type="text" placeholder='Search' autoFocus='autofocus' value={this.state.textbox} onChange={this.handleTextboxChange}/>
           <input type="submit" value="Populate Map" />
         </form>
+				<br></br>
+				<span className={this.state.scope === "usa"
+          ? 'nav-selected'
+          : 'nav-unselected'}
+          onClick={() => this.changeScope("usa")}>
+				USA </span>
+				<span className={this.state.scope === "world"
+          ? 'nav-selected'
+          : 'nav-unselected'}
+          onClick={() => this.changeScope("world")}>
+				World </span>
+				<br></br>
         <br></br>
 					<select defaultValue={this.state.selectValue} onChange={this.handleDropdown}>
             <option defaultValue hidden>Top National Trends</option>
@@ -154,7 +188,7 @@ export default class Map extends React.Component {
 				</div>
 				<div className='map'>
 					<Datamap
-						scope="usa"
+						scope={this.state.scope}
 						height='100%'
 						width='100%'
 						position='absolute'
@@ -175,6 +209,6 @@ export default class Map extends React.Component {
 					labels />
 				</div>
 			</div>
-		)
-	}
+			)
+		}
 }

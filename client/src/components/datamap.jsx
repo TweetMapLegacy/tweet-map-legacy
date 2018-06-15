@@ -1,6 +1,7 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import Datamaps from 'datamaps';
+import axios from 'axios';
 
 const MAP_CLEARING_PROPS = [
   'height', 'scope', 'setProjection', 'width'
@@ -14,22 +15,6 @@ const propChangeRequiresMapClear = (oldProps, newProps) => {
 
 export default class Datamap extends React.Component {
 	
-  // Originally in here when copied over but pops a syntax error
-  // static propTypes = {
-  // 	return {arc: PropTypes.array,
-  // 	arcOptions: PropTypes.object,
-  // 	bubbleOptions: PropTypes.object,
-  // 	bubbles: PropTypes.array,
-  // 	data: PropTypes.object,
-  // 	graticule: PropTypes.bool,
-  // 	height: PropTypes.any,
-  // 	labels: PropTypes.bool,
-  // 	responsive: PropTypes.bool,
-  // 	style: PropTypes.object,
-  // 	updateChoroplethOptions: PropTypes.object,
-  // 	width: PropTypes.any}
-  // };
-
   constructor(props) {
 		super(props);
 		this.resizeMap = this.resizeMap.bind(this);
@@ -79,35 +64,30 @@ export default class Datamap extends React.Component {
 			graticule,
 			labels,
 			updateChoroplethOptions,
-				
-			//Originally in here but spread operator is not working for us. Tried pulling props out manually, hopefully didn't miss anything
-			// ...props
 		} = this.props;
 
 		let map = this.map;
 
 		if (!map) {
 			map = this.map = new Datamaps({
-				//Originally in here but spread operator is not working for us. Tried pulling props out manually, hopefully didn't miss anything
-				// ...props,
 				scope: this.props.scope,
 				labels: this.props.labels,
 				fills: this.props.fills,
 				element: this.refs.container,
-				geographyConfig: this.props.geographyConfig,
-				data
+			 	geographyConfig: this.props.geographyConfig,
+				data,
 			});
 		} else {
 				map.options.fills = this.props.fills;
         map.updateChoropleth(data, updateChoroplethOptions);
 			}
-      map.legend();
+      //map.legend();
 			if (arc) {
 				map.arc(arc, arcOptions);
 			}
 
 			if (bubbles) {
-		  	map.bubbles(bubbles, bubbleOptions);
+		  
 			}
 
 			if (graticule) {
@@ -128,11 +108,7 @@ export default class Datamap extends React.Component {
 			height: this.props.height,
 			width: this.props.width,
 			position: this.props.position,
-			// height: '600px'
-			//Originally in here but spread operator is not working for us. Tried pulling props out manually, hopefully didn't miss anything
-			// ...this.props.style
 	  };
-
 	  return <div ref="container" style={style} />;
 	}
 
