@@ -61,8 +61,10 @@ export default class Map extends React.Component {
 	postStatePercentages(searchTerm) {
 		console.log('Keyword:', searchTerm)
 		if (searchTerm !== '') {
+			this.state.fetchInProgress = true;
 			axios.post('/statepercentages', { word: searchTerm })
 				.then((response) => {
+					this.state.fetchInProgress = false;
 					this.setPercentages(response.data);
 				})
 		}
