@@ -31,6 +31,17 @@ app.get('/keywords', async (req, res) => {
   res.send(keywords);
 });
 
+app.get('/bubbles/:query', (req, res) => {
+  const { query } = req.params;
+  db.getBubbles(query, (err, data) => {
+    if (err) {
+      res.status(404).end();
+    } else {
+      res.send(data);
+    }
+  });
+});
+
 app.post('/statepercentages', async (req, res) => {
   const percents = await db.getStatePercentages(req.body);
   res.send(percents);

@@ -56,13 +56,7 @@ export default class Datamap extends React.Component {
 
   drawMap() {
 		const {
-			arc,
-			arcOptions,
-			bubbles,
-			bubbleOptions,
 			data,
-			graticule,
-			labels,
 			updateChoroplethOptions,
 		} = this.props;
 
@@ -80,19 +74,7 @@ export default class Datamap extends React.Component {
 		} else {
 				map.options.fills = this.props.fills;
         map.updateChoropleth(data, updateChoroplethOptions);
-			}
-      //map.legend();
-			if (arc) {
-				map.arc(arc, arcOptions);
-			}
-
-			if (bubbles) {
-		  
-			}
-
-			if (graticule) {
-			  map.graticule();
-			}
+		}
 	}
 	
 	resizeMap() {

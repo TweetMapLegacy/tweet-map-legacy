@@ -82,6 +82,17 @@ const saveGlobalTrend = (data) => {
 //
 // ─── MANIPULATE DATA ────────────────────────────────────────────────────────────
 //
+
+const getBubbles = (query, callback) => {
+  Tweet.find({text: { $regex: query, $options: "i" }}, (err, data) => {
+    if (err) {
+      callback(err);
+    } else {
+      callback(null, data);
+    }
+  });
+}
+
 const getNationalTrends = () => nationalTrend.find({ rank: { $lte: 15 } }).select('trend');
 
 const getStateKeywords = () => {
@@ -255,6 +266,7 @@ module.exports = {
   saveStateTweet,
   saveNationalTrend,
   saveGlobalTrend,
+  getBubbles,
   getNationalTrends,
   getStateKeywords,
   getStatePercentages,
