@@ -46,3 +46,7 @@ tr {
   margin-left: 5%;
   margin-right: 5%;
 }
+
+.center{
+  margin: 0 auto;
+}

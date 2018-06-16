@@ -41,6 +41,7 @@
     "morgan": "^1.9.0",
     "react": "^16.4.0",
     "react-dom": "^16.4.0",
+    "react-loading": "^2.0.2",
     "remove-punctuation": "0.0.4",
     "request-rate-limiter": "^1.0.2",
     "stopword": "^0.1.10",

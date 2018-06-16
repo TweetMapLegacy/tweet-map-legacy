@@ -7,6 +7,7 @@ import CssBaseline from '@material-ui/core/CssBaseline';
 import Search from './components/Search.jsx';
 import Tables from './components/tables.jsx'
 import Map from './components/map.jsx'
+import ReactLoading from 'react-loading';
 
 //
 // ─── MATERIAL UI THEMING ────────────────────────────────────────────────────────
@@ -143,6 +144,9 @@ class App extends React.Component {
       })
   }
 
+
+
+
   render() {
     return (
       <MuiThemeProvider theme={theme}>
@@ -169,8 +173,7 @@ class App extends React.Component {
           <br></br>
             <br></br>
           </span>
-          {/* <h1>Hello, World!</h1>
-        <p>Team Twit 4 Lyfe!</p> */}
+
           {this.state.view === 'map'
             ? <Map />
             : <Tables />}

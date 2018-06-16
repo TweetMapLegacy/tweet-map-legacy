@@ -15,7 +15,7 @@ app.use(bodyParser.json());
 app.use(morgan('dev'));
 
 //cronJob.start();
-//cronJob.stop();
+cronJob.stop();
 
 
 //
