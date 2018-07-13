@@ -19,7 +19,7 @@ passport.use(
     {
       consumerKey: process.env.TWITTER_KEY,
       consumerSecret: process.env.TWITTER_SECRET,
-      callbackURL: 'http://206.189.170.211/auth/twitter/callback',
+      callbackURL: 'https://tweet-heat-map.herokuapp.com/auth/twitter/callback',
     },
     (token, tokenSecret, profile, cb) => {
       User.findOrCreate({twitterId: profile.id}, (err, user) => cb(err, user));

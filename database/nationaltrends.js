@@ -5,7 +5,7 @@ const axios = require('axios');
 const fs = require('fs');
 const db = require('./database.js');
 
-axios.get('https://api.twitter.com/1.1/trends/place.json?id=23424977', {
+axios.get('https://api.twitter.com/1.1/trends/place.json?id=1', {
   headers: {
     Authorization: 'Bearer AAAAAAAAAAAAAAAAAAAAAKhl6QAAAAAA7ryEMrycuJRLTZbyiyZmAJ6%2F8HM%3DgeDvD8L50Q0TgKP7cQJge4PLS26U7YvNlnlruVZ4n1HOo0TWJQ',
   },
@@ -23,7 +23,7 @@ const formatData = (data) => {
   for (const trend of data) {
     count++;
 
-    db.saveNationalTrend({
+    db.saveGlobalTrend({
       trend: trend.name,
       rank: count,
       date: today,

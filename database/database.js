@@ -59,6 +59,22 @@ const Tweet = mongoose.model(
   }), 'Tweets',
 );
 
+const Test = mongoose.model(
+  'Test',
+  new Schema({
+    place: String,
+    state: String,
+    country: String,
+    text: String,
+    username: String,
+    createdAt: Date,
+    latitude: Number,
+    longitude: Number,
+    radius: Number
+  }), 'Test',
+);
+
+
 //
 // ─── SAVE TO DB ─────────────────────────────────────────────────────────────────
 //
@@ -67,7 +83,7 @@ const saveStateTweet = (data) => {
 };
 
 const saveTweet = (data) => {
-  Tweet(data).save();
+  Test(data).save();
 };
 
 const saveNationalTrend = (data) => {

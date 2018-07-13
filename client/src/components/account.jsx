@@ -3,17 +3,20 @@ import React from 'react';
 import axios from 'axios';
 
 export default function Account(props) {
-  console.log(props);
+  const accountStyle = {
+    justifyContent: 'flex-end',
+    marginTop: '50px'
+  };
   return (
-    <div>
+    <div style={accountStyle}>
       {props.loggedIn ? (
         <div>
-          <h1>history</h1>
-          <ul>{props.history.map(item => <li>{item}</li>)}</ul>
+           <h2>Search History</h2>
+          {props.history.map(item => <p>{item}</p>)}
         </div>
       ) : (
         <form action="/auth/twitter" method="GET">
-          <button>login</button>
+          <button>Login</button>
         </form>
       )}
     </div>

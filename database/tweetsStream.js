@@ -71,71 +71,80 @@ let count = 0;
 //
 // ─── CRONJOB ────────────────────────────────────────────────────────────────────
 //
-const cronJob = new CronJob(
-  '*/15 * * * *', () => {
-    console.log('Starting new stream via CronJob.');
-
-    // Stop the previous stream
-    if (stream) {
-      stream.stop();
-      console.log(`Stored ${count} tweets!`);
-    }
-
+const cronJobUS = new CronJob ('0 * * * *', () => {
+    console.log('Starting new US stream via CronJob.');
     // Create a new stream
-    stream = twit.stream('statuses/sample');
+    stream = twit.stream('statuses/filter', {locations: US});
 
     // Start the new stream
-    stream.on('tweet', (tweet) => {
-      count += 1;
-      console.log(tweet.text);
+    twitStream(stream, 'US');
 
-      if (tweet.place && (tweet.place.place_type === 'city' || tweet.place.place_type === 'admin')) {
-        let state;
-        if (tweet.place.country_code === 'US') {
-          if (tweet.place.place_type === 'city') {
-            // Get state abbreviation from the end of the place name
-            state = tweet.place.full_name.slice(tweet.place.full_name.length - 2);
-          } else {
-            // Remove ", USA" fron the place name and convert to abbreviation
-            const stateName = tweet.place.full_name.slice(0, tweet.place.full_name.length - 5);
-            if (Object.keys(acronyms).includes(stateName)) {
-              state = acronyms[stateName];
-            }
-          }
-        }
-
-        let tweetText = tweet.text;
-        if (tweet.retweeted_status !== undefined) {
-          tweetText += ` ~ ${tweet.retweeted_status.text}`;
-        }
-        if (tweet.quoted_status !== undefined) {
-          tweetText += ` ~ ${tweet.quoted_status.text}`;
-        }
-
-        db.saveTweet({
-          place: tweet.place.full_name,
-          state,
-          country: tweet.place.country_code,
-          text: tweetText,
-          username: tweet.user.screen_name,
-          createdAt: tweet.created_at,
-          link: `https://twitter.com/statuses/${tweet.id_str}`,
-          latitude: tweet.place.bounding_box.coordinates[0][0][1],
-          longitude: tweet.place.bounding_box.coordinates[0][0][0],
-          radius: 2.5,
-        });
-      }
-    });
+    setTimeout(() => {
+      stream.stop();
+      console.log(`Stored ${count} US tweets!`);
+    }, 15 * 60 * 100);
   },
   null, true, 'America/Los_Angeles',
 );
-// // ────────────────────────────────────────────────────────────────────────────────
 
-// cronJob.start();
+const cronJobWorld = new CronJob ('16 * * * *', () => {
+  console.log('Starting new World stream via CronJob.');
+  // Create a new stream
+  stream = twit.stream('statuses/sample');
 
-// setTimeout(() => {
-//   stream.stop();
+  // Start the new stream
+  twitStream(stream, 'World');
 
-// }, 30 * 60 * 1000);
+  setTimeout(() => {
+    stream.stop();
+    console.log(`Stored ${count} World tweets!`);
+  }, 43 * 60 * 100);
+},
+null, true, 'America/Los_Angeles',
+);
 
-module.exports = { cronJob };
+const twitStream = (stream, scope) => {
+  stream.on('tweet', (tweet) => {
+    count += 1;
+    console.log(scope, tweet.text);
+
+    if (tweet.place && (tweet.place.place_type === 'city' || tweet.place.place_type === 'admin')) {
+      let state;
+      if (tweet.place.country_code === 'US') {
+        if (tweet.place.place_type === 'city') {
+          // Get state abbreviation from the end of the place name
+          state = tweet.place.full_name.slice(tweet.place.full_name.length - 2);
+        } else {
+          // Remove ", USA" fron the place name and convert to abbreviation
+          const stateName = tweet.place.full_name.slice(0, tweet.place.full_name.length - 5);
+          if (Object.keys(acronyms).includes(stateName)) {
+            state = acronyms[stateName];
+          }
+        }
+      }
+
+      let tweetText = tweet.text;
+      if (tweet.retweeted_status !== undefined) {
+        tweetText += ` ~ ${tweet.retweeted_status.text}`;
+      }
+      if (tweet.quoted_status !== undefined) {
+        tweetText += ` ~ ${tweet.quoted_status.text}`;
+      }
+
+      db.saveTweet({
+        place: tweet.place.full_name,
+        state,
+        country: tweet.place.country_code,
+        text: tweetText,
+        username: tweet.user.screen_name,
+        createdAt: tweet.created_at,
+        link: `https://twitter.com/statuses/${tweet.id_str}`,
+        latitude: tweet.place.bounding_box.coordinates[0][0][1],
+        longitude: tweet.place.bounding_box.coordinates[0][0][0],
+        radius: 2.5,
+      });
+    }
+  });
+}
+
+module.exports = { cronJobUS, cronJobWorld };

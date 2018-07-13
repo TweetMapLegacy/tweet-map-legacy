@@ -2,7 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const morgan = require('morgan');
 const db = require('../database/database');
-const {cronJob} = require('../database/tweetsStream');
+const { cronJobUS, cronJobWorld } = require('../database/tweetsStream');
 const app = (module.exports = express());
 const auth = require('./auth');
 const User = require('../database/user');
@@ -13,8 +13,8 @@ const User = require('../database/user');
 app.use(express.static(`${__dirname}/../client/dist/`));
 app.use(bodyParser.json());
 app.use(morgan('dev'));
-//cronJob.start();
-//cronJob.stop();
+cronJobUS.start();
+cronJobWorld.start();
 
 //
 // ─── NATIVE ENDPOINTS ───────────────────────────────────────────────────────────
